@@ -3,10 +3,10 @@
     <div class="search-nav">
       <el-form inline size="small">
         <el-form-item label="类别名称：">
-          <el-input v-model="classificationName" clearable placeholder="请输入类别名称" />
+          <el-input v-model="searchText" clearable placeholder="请输入类别名称" />
         </el-form-item>
         <el-form-item>
-          <el-button>查询</el-button>
+          <el-button @click="search">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -24,7 +24,7 @@
         width="100"
       >
         <template slot-scope="{row}">
-          <el-button icon="el-icon-edit" @click="editClassification(row)" />
+          <el-button icon="el-icon-edit" size="small" @click="editClassification(row)" />
         </template>
       </el-table-column>
       <el-table-column
@@ -33,7 +33,7 @@
         width="100"
       >
         <template slot-scope="{row}">
-          <el-button icon="el-icon-delete" type="danger" @click="delClassification(row)" />
+          <el-button icon="el-icon-delete" size="small" type="danger" @click="delClassification(row)" />
         </template>
       </el-table-column>
     </el-table>
@@ -46,16 +46,19 @@ export default {
   data() {
     return {
       tableData: [],
-      classificationName: ''
+      searchText: ''
     }
   },
   created() {
-    const tableData = localStorage.getItem('classificationList')
-    if (tableData) {
-      this.tableData = JSON.parse(tableData)
-    }
+    this.getData()
   },
   methods: {
+    getData() {
+      const tableData = localStorage.getItem('classificationList')
+      if (tableData) {
+        this.tableData = JSON.parse(tableData)
+      }
+    },
     editClassification(row) {
       this.$prompt('请输入类别名称', '提示', {
         confirmButtonText: '确定',
@@ -92,6 +95,10 @@ export default {
       }).catch(() => {
 
       })
+    },
+    search() {
+      this.getData()
+      this.tableData = this.tableData.filter(item => item.name.includes(this.searchText))
     }
   }
 }

@@ -73,6 +73,26 @@ export const constantRoutes = [
         meta: { title: '添加类别信息', icon: 'form' }
       }
     ]
+  },
+  {
+    path: '/merchant',
+    component: Layout,
+    redirect: '/merchant/list',
+    meta: { title: '商家信息管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'list',
+        name: 'merchantList',
+        component: () => import('@/views/merchant/merchantList'),
+        meta: { title: '商家信息列表', icon: 'form' }
+      },
+      {
+        path: 'edit',
+        name: 'merchantEdit',
+        component: () => import('@/views/merchant/merchantEdit'),
+        meta: { title: '添加商家信息', icon: 'form' }
+      }
+    ]
   }
 ]
 
