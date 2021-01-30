@@ -69,7 +69,7 @@ export default {
   background-color: #fff;
   margin: 15px;
   padding: 10px;
-
+  max-width: 700px;
   ::v-deep .el-form--inline .el-form-item {
     //margin-bottom: 0;
   }

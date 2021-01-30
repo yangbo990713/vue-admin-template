@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="form" :inline="inline" :model="params" :rules="rules" size="small">
+  <el-form ref="form" :inline="inline" :model="params" :rules="rules" label-width="auto" size="small">
     <el-form-item label="商家编号：" prop="code">
       <el-input v-model="params.code" clearable placeholder="请输入商家编号" />
     </el-form-item>
@@ -35,7 +35,7 @@ export default {
     },
     inline: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
   data() {
@@ -104,6 +104,10 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss" scoped>
+.el-form-item{
+  &:last-child{
+    margin-bottom: 0;
+  }
+}
 </style>

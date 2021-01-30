@@ -57,7 +57,7 @@
       </el-table-column>
     </el-table>
     <el-dialog :visible.sync="visible">
-      <merchant-form :inline="false" :params="currentItem" @confirm="confirmEdit" />
+      <merchant-form :params="currentItem" @confirm="confirmEdit" />
     </el-dialog>
   </div>
 </template>
