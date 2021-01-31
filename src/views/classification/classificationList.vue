@@ -20,7 +20,6 @@
       />
       <el-table-column
         label="编辑"
-        prop="name"
         width="100"
       >
         <template slot-scope="{row}">
@@ -29,7 +28,6 @@
       </el-table-column>
       <el-table-column
         label="删除"
-        prop="address"
         width="100"
       >
         <template slot-scope="{row}">

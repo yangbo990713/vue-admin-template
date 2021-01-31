@@ -93,6 +93,26 @@ export const constantRoutes = [
         meta: { title: '添加商家信息', icon: 'form' }
       }
     ]
+  },
+  {
+    path: '/goods',
+    component: Layout,
+    redirect: '/goods/list',
+    meta: { title: '物品信息管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'list',
+        name: 'goodsList',
+        component: () => import('@/views/goods/goodsList'),
+        meta: { title: '物品信息列表', icon: 'form' }
+      },
+      {
+        path: 'edit',
+        name: 'goodsEdit',
+        component: () => import('@/views/goods/goodsEdit'),
+        meta: { title: '添加物品信息', icon: 'form' }
+      }
+    ]
   }
 ]
 

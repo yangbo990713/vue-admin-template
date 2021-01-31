@@ -2,11 +2,11 @@
   <div class="classification-list">
     <div class="search-nav">
       <el-form inline size="small">
-        <el-form-item label="商家编号：">
-          <el-input v-model="code" clearable placeholder="请输入商家编号" />
+        <el-form-item label="物品编号：">
+          <el-input v-model="code" clearable placeholder="请输入物品编号" />
         </el-form-item>
-        <el-form-item label="商家名称：">
-          <el-input v-model="searchText" clearable placeholder="请输入商家名称" />
+        <el-form-item label="物品名称：">
+          <el-input v-model="searchText" clearable placeholder="请输入物品名称" />
         </el-form-item>
         <el-form-item>
           <el-button @click="search">查询</el-button>
@@ -18,31 +18,31 @@
       border
     >
       <el-table-column
-        label="商家编号"
+        label="物品编号"
         prop="code"
       />
       <el-table-column
-        label="商家名称"
+        label="物品名称"
         prop="name"
       />
       <el-table-column
-        label="联系人"
-        prop="person"
+        label="类别"
+        prop="classification"
       />
       <el-table-column
-        label="电话"
-        prop="tel"
+        label="价格"
+        prop="price"
       />
       <el-table-column
-        label="地址"
-        prop="address"
+        label="库存"
+        prop="number"
       />
       <el-table-column
         label="编辑"
         width="100"
       >
         <template slot-scope="{row}">
-          <el-button icon="el-icon-edit" size="small" @click="editClassification(row)" />
+          <el-button icon="el-icon-edit" size="small" @click="editGoods(row)" />
         </template>
       </el-table-column>
       <el-table-column
@@ -50,28 +50,35 @@
         width="100"
       >
         <template slot-scope="{row}">
-          <el-button icon="el-icon-delete" size="small" type="danger" @click="delClassification(row)" />
+          <el-button icon="el-icon-delete" size="small" type="danger" @click="delGoods(row)" />
         </template>
       </el-table-column>
     </el-table>
     <el-dialog :visible.sync="visible">
-      <merchant-form :params="currentItem" @confirm="confirmEdit" />
+      <goods-form :params="currentItem" @confirm="confirmEdit" />
     </el-dialog>
   </div>
 </template>
 
 <script>
-import MerchantForm from '@/views/merchant/components/merchantForm'
+import GoodsForm from '@/views/goods/components/goodsForm'
 export default {
-  name: 'MerchantList',
-  components: { MerchantForm },
+  name: 'GoodsList',
+  components: { GoodsForm },
   data() {
     return {
       tableData: [],
       searchText: '',
       code: '',
       visible: false,
-      currentItem: {}
+      currentItem: {
+        name: '',
+        code: '',
+        classificationId: '',
+        classification: '',
+        price: '',
+        number: ''
+      }
     }
   },
   created() {
@@ -79,23 +86,23 @@ export default {
   },
   methods: {
     getData() {
-      const tableData = localStorage.getItem('merchantList')
+      const tableData = localStorage.getItem('goodsList')
       if (tableData) {
         this.tableData = JSON.parse(tableData)
       }
     },
-    editClassification(row) {
+    editGoods(row) {
       this.currentItem = { ...row }
       this.visible = true
     },
-    delClassification(row) {
-      this.$confirm('是否确认删除该商家', '提示', {
+    delGoods(row) {
+      this.$confirm('是否确认删除该物品', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('merchantList', JSON.stringify(this.tableData))
+        localStorage.setItem('goodsList', JSON.stringify(this.tableData))
         this.$message({
           type: 'success',
           message: '删除成功!'
@@ -110,13 +117,13 @@ export default {
     },
     confirmEdit(row) {
       if (this.tableData.find(item => item.code === row.code && item.id !== row.id)) {
-        this.$message.error('商家编号重复')
+        this.$message.error('物品编号重复')
         return
       }
       this.visible = false
       const index = this.tableData.findIndex(item => item.id === row.id)
       this.tableData.splice(index, 1, row)
-      localStorage.setItem('merchantList', JSON.stringify(this.tableData))
+      localStorage.setItem('goodsList', JSON.stringify(this.tableData))
       this.$message({
         type: 'success',
         message: '修改成功'
