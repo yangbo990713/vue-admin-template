@@ -15,7 +15,7 @@
       <el-input v-model.number="params.price" clearable placeholder="请输入价格" />
     </el-form-item>
     <el-form-item label="库存：" prop="number">
-      <el-input v-model="params.number" clearable placeholder="请输入库存" />
+      <el-input v-model.number="params.number" clearable placeholder="请输入库存" />
     </el-form-item>
     <el-form-item>
       <el-button @click="addClassification">确定</el-button>
@@ -76,6 +76,16 @@ export default {
           {
             required: true,
             message: '请输入物品价格'
+          },
+          {
+            type: 'number',
+            message: '请输入合法数字'
+          }
+        ],
+        number: [
+          {
+            required: true,
+            message: '请输入库存数量'
           },
           {
             type: 'number',

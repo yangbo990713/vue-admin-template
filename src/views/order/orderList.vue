@@ -2,11 +2,11 @@
   <div class="classification-list">
     <div class="search-nav">
       <el-form inline size="small">
-        <el-form-item label="商家编号：">
-          <el-input v-model="code" clearable placeholder="请输入商家编号" />
+        <el-form-item label="订单编号：">
+          <el-input v-model="code" clearable placeholder="请输入订单编号" />
         </el-form-item>
-        <el-form-item label="商家名称：">
-          <el-input v-model="searchText" clearable placeholder="请输入商家名称" />
+        <el-form-item label="物品名称：">
+          <el-input v-model="name" clearable placeholder="请输入物品名称" />
         </el-form-item>
         <el-form-item>
           <el-button @click="search">查询</el-button>
@@ -18,31 +18,54 @@
       border
     >
       <el-table-column
-        label="商家编号"
+        label="订单编号"
         prop="code"
       />
       <el-table-column
-        label="商家名称"
-        prop="name"
+        label="物品编号"
+        prop="goodsCode"
       />
       <el-table-column
-        label="联系人"
-        prop="person"
+        label="物品名称"
+        prop="goodsName"
       />
       <el-table-column
-        label="电话"
-        prop="tel"
+        label="物品数量"
+        prop="number"
       />
       <el-table-column
-        label="地址"
-        prop="address"
+        label="物品单价"
+        prop="price"
       />
+      <el-table-column
+        label="合计"
+      >
+        <template slot-scope="{row}">
+          {{ row.price*row.number }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="日期"
+        prop="date"
+      />
+      <el-table-column
+        label="商家"
+        prop="merchantName"
+      />
+      <el-table-column
+        label="级别"
+        prop="levelName"
+      >
+        <template slot-scope="{row}">
+          <el-tag :type="row.levelId===1?'danger':'info'">{{ row.levelName }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         label="编辑"
         width="100"
       >
         <template slot-scope="{row}">
-          <el-button icon="el-icon-edit" size="small" @click="editClassification(row)" />
+          <el-button icon="el-icon-edit" size="small" @click="editOrder(row)" />
         </template>
       </el-table-column>
       <el-table-column
@@ -50,28 +73,35 @@
         width="100"
       >
         <template slot-scope="{row}">
-          <el-button icon="el-icon-delete" size="small" type="danger" @click="delClassification(row)" />
+          <el-button icon="el-icon-delete" size="small" type="danger" @click="delOrder(row)" />
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog :visible.sync="visible" title="编辑商家">
-      <merchant-form :params="currentItem" @confirm="confirmEdit" />
+    <el-dialog :visible.sync="visible" title="编辑订单">
+      <order-form :params="currentItem" @confirm="confirmEdit" />
     </el-dialog>
   </div>
 </template>
 
 <script>
-import MerchantForm from '@/views/merchant/components/merchantForm'
+import OrderForm from '@/views/order/components/orderForm'
 export default {
-  name: 'MerchantList',
-  components: { MerchantForm },
+  name: 'OrderList',
+  components: { OrderForm },
   data() {
     return {
       tableData: [],
-      searchText: '',
       code: '',
+      name: '',
       visible: false,
-      currentItem: {}
+      currentItem: {
+        name: '',
+        code: '',
+        classificationId: '',
+        classification: '',
+        price: '',
+        number: ''
+      }
     }
   },
   created() {
@@ -79,23 +109,23 @@ export default {
   },
   methods: {
     getData() {
-      const tableData = localStorage.getItem('merchantList')
+      const tableData = localStorage.getItem('orderList')
       if (tableData) {
         this.tableData = JSON.parse(tableData)
       }
     },
-    editClassification(row) {
+    editOrder(row) {
       this.currentItem = { ...row }
       this.visible = true
     },
-    delClassification(row) {
-      this.$confirm('是否确认删除该商家', '提示', {
+    delOrder(row) {
+      this.$confirm('是否确认删除该订单', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('merchantList', JSON.stringify(this.tableData))
+        localStorage.setItem('orderList', JSON.stringify(this.tableData))
         this.$message({
           type: 'success',
           message: '删除成功!'
@@ -106,17 +136,17 @@ export default {
     },
     search() {
       this.getData()
-      this.tableData = this.tableData.filter(item => item.name.includes(this.searchText) && item.code.includes(this.code))
+      this.tableData = this.tableData.filter(item => item.code.includes(this.code) && item.goodsName.includes(this.name))
     },
     confirmEdit(row) {
       if (this.tableData.find(item => item.code === row.code && item.id !== row.id)) {
-        this.$message.error('商家编号重复')
+        this.$message.error('订单编号重复')
         return
       }
       this.visible = false
       const index = this.tableData.findIndex(item => item.id === row.id)
       this.tableData.splice(index, 1, row)
-      localStorage.setItem('merchantList', JSON.stringify(this.tableData))
+      localStorage.setItem('orderList', JSON.stringify(this.tableData))
       this.$message({
         type: 'success',
         message: '修改成功'

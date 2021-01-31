@@ -54,7 +54,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog :visible.sync="visible">
+    <el-dialog :visible.sync="visible" title="编辑物品">
       <goods-form :params="currentItem" @confirm="confirmEdit" />
     </el-dialog>
   </div>
