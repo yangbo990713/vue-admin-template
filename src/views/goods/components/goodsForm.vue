@@ -19,11 +19,10 @@
     </el-form-item>
     <el-form-item>
       <el-button @click="addClassification">确定</el-button>
-      <el-button v-if="!inline" @click="resetFields">清空</el-button>
     </el-form-item>
-    <el-form-item v-if="inline">
+    <!--<el-form-item v-if="inline">
       <el-button @click="resetFields">清空</el-button>
-    </el-form-item>
+    </el-form-item>-->
   </el-form>
 </template>
 

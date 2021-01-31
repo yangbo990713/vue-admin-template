@@ -133,6 +133,26 @@ export const constantRoutes = [
         meta: { title: '添加订单信息', icon: 'form' }
       }
     ]
+  },
+  {
+    path: '/returnOrder',
+    component: Layout,
+    redirect: '/returnOrder/list',
+    meta: { title: '退货单信息管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: 'list',
+        name: 'returnOrderList',
+        component: () => import('@/views/returnOrder/returnOrderList'),
+        meta: { title: '退货单信息列表', icon: 'form' }
+      },
+      {
+        path: 'edit',
+        name: 'returnOrderEdit',
+        component: () => import('@/views/returnOrder/returnOrderEdit'),
+        meta: { title: '添加退货单信息', icon: 'form' }
+      }
+    ]
   }
 ]
 
