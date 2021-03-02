@@ -1,8 +1,8 @@
 <template>
   <section class="app-main">
-    <video id="v1" autoplay loop muted>
+    <!--<video id="v1" autoplay loop muted>
       <source src="../../../src/assets/sao_hr01.mp4" type="video/mp4">
-    </video>
+    </video>-->
     <transition mode="out-in" name="fade-transform">
       <router-view :key="key" />
     </transition>

@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import Axios from 'axios'
+
 export default {
   name: 'ClassificationList',
   data() {
@@ -52,6 +54,10 @@ export default {
   },
   methods: {
     getData() {
+      Axios.get('http://tp51/index.php/api/CommodityType/typeList', { params: {}})
+        .then(({ data }) => {
+          console.log('Galaxy', data)
+        })
       const tableData = localStorage.getItem('classificationList')
       if (tableData) {
         this.tableData = JSON.parse(tableData)
@@ -76,7 +82,8 @@ export default {
           type: 'success',
           message: '修改成功'
         })
-      }).catch(() => {})
+      }).catch(() => {
+      })
     },
     delClassification(row) {
       this.$confirm('是否确认删除该类别', '提示', {
@@ -103,12 +110,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.classification-list{
+.classification-list {
   background-color: #fff;
   margin: 15px;
-  .search-nav{
+
+  .search-nav {
     padding: 10px;
-    ::v-deep .el-form--inline .el-form-item{
+
+    ::v-deep .el-form--inline .el-form-item {
       margin-bottom: 0;
     }
   }
