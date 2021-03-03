@@ -9,7 +9,7 @@
           <el-input v-model="searchText" clearable placeholder="请输入物品名称" />
         </el-form-item>
         <el-form-item>
-          <el-button @click="search">查询</el-button>
+          <el-button @click="getData">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -19,7 +19,7 @@
     >
       <el-table-column
         label="物品编号"
-        prop="code"
+        prop="number"
       />
       <el-table-column
         label="物品名称"
@@ -27,7 +27,7 @@
       />
       <el-table-column
         label="类别"
-        prop="classification"
+        prop="type_name"
       />
       <el-table-column
         label="价格"
@@ -35,7 +35,7 @@
       />
       <el-table-column
         label="库存"
-        prop="number"
+        prop="stock"
       />
       <el-table-column
         label="编辑"
@@ -62,6 +62,8 @@
 
 <script>
 import GoodsForm from '@/views/goods/components/goodsForm'
+import Axios from 'axios'
+
 export default {
   name: 'GoodsList',
   components: { GoodsForm },
@@ -71,14 +73,7 @@ export default {
       searchText: '',
       code: '',
       visible: false,
-      currentItem: {
-        name: '',
-        code: '',
-        classificationId: '',
-        classification: '',
-        price: '',
-        number: ''
-      }
+      currentItem: {}
     }
   },
   created() {
@@ -86,10 +81,14 @@ export default {
   },
   methods: {
     getData() {
-      const tableData = localStorage.getItem('goodsList')
-      if (tableData) {
-        this.tableData = JSON.parse(tableData)
-      }
+      Axios.get('http://tp51/index.php/api/CommodityInformation/commodityList', {
+        params: {
+          number: this.code,
+          name: this.searchText
+        }
+      }).then(({ data }) => {
+        this.tableData = data.data
+      })
     },
     editGoods(row) {
       this.currentItem = { ...row }
@@ -101,32 +100,42 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('goodsList', JSON.stringify(this.tableData))
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        Axios.get('http://tp51/index.php/api/CommodityInformation/delCommodity', {
+          params: {
+            id: row.id
+          }
+        }).then(({ data }) => {
+          if (data && data.code === 200) {
+            this.visible = false
+            this.$message({
+              type: 'success',
+              message: '删除成功'
+            })
+            this.getData()
+          } else {
+            this.$message.error(data)
+          }
         })
       }).catch(() => {
 
       })
     },
-    search() {
-      this.getData()
-      this.tableData = this.tableData.filter(item => item.name.includes(this.searchText) && item.code.includes(this.code))
-    },
     confirmEdit(row) {
-      if (this.tableData.find(item => item.code === row.code && item.id !== row.id)) {
-        this.$message.error('物品编号重复')
-        return
-      }
-      this.visible = false
-      const index = this.tableData.findIndex(item => item.id === row.id)
-      this.tableData.splice(index, 1, row)
-      localStorage.setItem('goodsList', JSON.stringify(this.tableData))
-      this.$message({
-        type: 'success',
-        message: '修改成功'
+      Axios.get('http://tp51/index.php/api/CommodityInformation/editCommodity', {
+        params: {
+          ...row
+        }
+      }).then(({ data }) => {
+        if (data && data.code === 200) {
+          this.visible = false
+          this.$message({
+            type: 'success',
+            message: '修改成功'
+          })
+          this.getData()
+        } else {
+          this.$message.error(data)
+        }
       })
     }
   }
@@ -134,19 +143,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.classification-list{
+.classification-list {
   background-color: #fff;
   margin: 15px;
-  .search-nav{
+
+  .search-nav {
     padding: 10px;
-    ::v-deep .el-form--inline .el-form-item{
+
+    ::v-deep .el-form--inline .el-form-item {
       margin-bottom: 0;
     }
   }
 
   ::v-deep .el-table--border th.gutter:last-of-type {
-    display: block!important;
-    width: 17px!important;
+    display: block !important;
+    width: 17px !important;
   }
 }
 </style>

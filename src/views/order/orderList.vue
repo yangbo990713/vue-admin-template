@@ -9,7 +9,7 @@
           <el-input v-model="name" clearable placeholder="请输入物品名称" />
         </el-form-item>
         <el-form-item>
-          <el-button @click="search">查询</el-button>
+          <el-button @click="getData">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -19,29 +19,29 @@
     >
       <el-table-column
         label="订单编号"
-        prop="code"
-      />
-      <el-table-column
-        label="物品编号"
-        prop="goodsCode"
-      />
-      <el-table-column
-        label="物品名称"
-        prop="goodsName"
-      />
-      <el-table-column
-        label="物品数量"
         prop="number"
       />
       <el-table-column
+        label="物品编号"
+        prop="commodity_number"
+      />
+      <el-table-column
+        label="物品名称"
+        prop="commodity_name"
+      />
+      <el-table-column
+        label="物品数量"
+        prop="quantity"
+      />
+      <el-table-column
         label="物品单价"
-        prop="price"
+        prop="commodity_price"
       />
       <el-table-column
         label="合计"
       >
         <template slot-scope="{row}">
-          {{ row.price*row.number }}
+          {{ row.commodity_price*row.quantity }}
         </template>
       </el-table-column>
       <el-table-column
@@ -50,14 +50,14 @@
       />
       <el-table-column
         label="商家"
-        prop="merchantName"
+        prop="business_name"
       />
       <el-table-column
         label="级别"
         prop="levelName"
       >
         <template slot-scope="{row}">
-          <el-tag :type="row.levelId===1?'danger':'info'">{{ row.levelName }}</el-tag>
+          <el-tag :type="row.level===2?'danger':'info'">{{ row.level===2?'加急':'普通' }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
@@ -85,6 +85,7 @@
 
 <script>
 import OrderForm from '@/views/order/components/orderForm'
+import Axios from 'axios'
 export default {
   name: 'OrderList',
   components: { OrderForm },
@@ -109,10 +110,16 @@ export default {
   },
   methods: {
     getData() {
-      const tableData = localStorage.getItem('orderList')
-      if (tableData) {
-        this.tableData = JSON.parse(tableData)
-      }
+      Axios.get('http://tp51/index.php/api/OrderInformation/orderList', {
+        params: {
+          number: this.code,
+          name: this.name
+        }
+      }).then(({ data }) => {
+        if (data && data.code === 200) {
+          this.tableData = data.data
+        }
+      })
     },
     editOrder(row) {
       this.currentItem = { ...row }
@@ -124,32 +131,41 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('orderList', JSON.stringify(this.tableData))
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        Axios.get('http://tp51/index.php/api/OrderInformation/delOrder', {
+          params: {
+            id: row.id
+          }
+        }).then(({ data }) => {
+          if (data && data.code === 200) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          }
+          this.getData()
         })
       }).catch(() => {
 
       })
     },
-    search() {
-      this.getData()
-      this.tableData = this.tableData.filter(item => item.code.includes(this.code) && item.goodsName.includes(this.name))
-    },
     confirmEdit(row) {
-      if (this.tableData.find(item => item.code === row.code && item.id !== row.id)) {
-        this.$message.error('订单编号重复')
-        return
-      }
-      this.visible = false
-      const index = this.tableData.findIndex(item => item.id === row.id)
-      this.tableData.splice(index, 1, row)
-      localStorage.setItem('orderList', JSON.stringify(this.tableData))
-      this.$message({
-        type: 'success',
-        message: '修改成功'
+      delete row.commodity_name
+      delete row.commodity_price
+      delete row.commodity_number
+      delete row.business_name
+      Axios.get('http://tp51/index.php/api/OrderInformation/editOrder', {
+        params: {
+          ...row
+        }
+      }).then(({ data }) => {
+        if (data && data.code === 200) {
+          this.visible = false
+          this.$message({
+            type: 'success',
+            message: '修改成功'
+          })
+          this.getData()
+        }
       })
     }
   }

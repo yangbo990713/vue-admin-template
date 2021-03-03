@@ -6,36 +6,27 @@
 
 <script>
 import MerchantForm from '@/views/merchant/components/merchantForm'
+import Axios from 'axios'
 export default {
   name: 'MerchantEdit',
   components: { MerchantForm },
   data() {
     return {
       params: {
+        number: '',
         name: '',
-        code: '',
-        person: '',
-        tel: '',
+        contact_person: '',
+        telephone: '',
         address: ''
       }
     }
   },
   methods: {
     addClassification(params) {
-      let tableData = localStorage.getItem('merchantList')
-      if (tableData) {
-        tableData = JSON.parse(tableData)
-      } else {
-        tableData = []
-      }
-      if (tableData.find(item => item.code === params.code)) {
-        this.$message.error('商家编号重复')
-        return
-      }
-
-      const id = tableData.length ? tableData[tableData.length - 1].id + 1 : 1
-      tableData.push(Object.assign(params, { id }))
-      localStorage.setItem('merchantList', JSON.stringify(tableData))
+      console.log('Galaxy', JSON.stringify(params))
+      Axios.get('http://tp51/index.php/api/BusinessInformation/addBusiness', { params: { ...params }}).then(({ data }) => {
+        this.tableData = data.data
+      })
       this.$message.success('添加成功')
       this.$refs.merchantForm.resetFields()
     }

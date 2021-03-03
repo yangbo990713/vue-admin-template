@@ -9,7 +9,7 @@
           <el-input v-model="searchText" clearable placeholder="请输入商家名称" />
         </el-form-item>
         <el-form-item>
-          <el-button @click="search">查询</el-button>
+          <el-button @click="getData">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -19,7 +19,7 @@
     >
       <el-table-column
         label="商家编号"
-        prop="code"
+        prop="number"
       />
       <el-table-column
         label="商家名称"
@@ -27,11 +27,11 @@
       />
       <el-table-column
         label="联系人"
-        prop="person"
+        prop="contact_person"
       />
       <el-table-column
         label="电话"
-        prop="tel"
+        prop="telephone"
       />
       <el-table-column
         label="地址"
@@ -62,6 +62,8 @@
 
 <script>
 import MerchantForm from '@/views/merchant/components/merchantForm'
+import Axios from 'axios'
+
 export default {
   name: 'MerchantList',
   components: { MerchantForm },
@@ -79,10 +81,14 @@ export default {
   },
   methods: {
     getData() {
-      const tableData = localStorage.getItem('merchantList')
-      if (tableData) {
-        this.tableData = JSON.parse(tableData)
-      }
+      Axios.get('http://tp51/index.php/api/BusinessInformation/businessList', {
+        params: {
+          name: this.searchText,
+          number: this.code
+        }
+      }).then(({ data }) => {
+        this.tableData = data.data
+      })
     },
     editClassification(row) {
       this.currentItem = { ...row }
@@ -94,32 +100,33 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('merchantList', JSON.stringify(this.tableData))
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        Axios.get('http://tp51/index.php/api/BusinessInformation/delBusiness', {
+          params: {
+            id: row.id
+          }
+        }).then(({ data }) => {
+          this.getData()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
         })
       }).catch(() => {
 
       })
     },
-    search() {
-      this.getData()
-      this.tableData = this.tableData.filter(item => item.name.includes(this.searchText) && item.code.includes(this.code))
-    },
     confirmEdit(row) {
-      if (this.tableData.find(item => item.code === row.code && item.id !== row.id)) {
-        this.$message.error('商家编号重复')
-        return
-      }
       this.visible = false
-      const index = this.tableData.findIndex(item => item.id === row.id)
-      this.tableData.splice(index, 1, row)
-      localStorage.setItem('merchantList', JSON.stringify(this.tableData))
-      this.$message({
-        type: 'success',
-        message: '修改成功'
+      Axios.get('http://tp51/index.php/api/BusinessInformation/editBusiness', {
+        params: {
+          ...row
+        }
+      }).then(() => {
+        this.getData()
+        this.$message({
+          type: 'success',
+          message: '修改成功'
+        })
       })
     }
   }
@@ -127,19 +134,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.classification-list{
+.classification-list {
   background-color: #fff;
   margin: 15px;
-  .search-nav{
+
+  .search-nav {
     padding: 10px;
-    ::v-deep .el-form--inline .el-form-item{
+
+    ::v-deep .el-form--inline .el-form-item {
       margin-bottom: 0;
     }
   }
 
   ::v-deep .el-table--border th.gutter:last-of-type {
-    display: block!important;
-    width: 17px!important;
+    display: block !important;
+    width: 17px !important;
   }
 }
 </style>

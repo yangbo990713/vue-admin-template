@@ -6,7 +6,7 @@
           <el-input v-model="searchText" clearable placeholder="请输入类别名称" />
         </el-form-item>
         <el-form-item>
-          <el-button @click="search">查询</el-button>
+          <el-button @click="getData">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -16,7 +16,7 @@
     >
       <el-table-column
         label="类别名称"
-        prop="name"
+        prop="type_name"
       />
       <el-table-column
         label="编辑"
@@ -54,20 +54,20 @@ export default {
   },
   methods: {
     getData() {
-      Axios.get('http://tp51/index.php/api/CommodityType/typeList', { params: {}})
+      Axios.get('http://tp51/index.php/api/CommodityType/typeList', { params: { type_name: this.searchText }})
         .then(({ data }) => {
-          console.log('Galaxy', data)
+          if (data && data.code === 200) {
+            this.tableData = data.data
+          } else {
+            this.$message.error(data)
+          }
         })
-      const tableData = localStorage.getItem('classificationList')
-      if (tableData) {
-        this.tableData = JSON.parse(tableData)
-      }
     },
     editClassification(row) {
       this.$prompt('请输入类别名称', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputValue: row.name,
+        inputValue: row.type_name,
         inputValidator(val) {
           if (!val) {
             return '类别名称不能为空'
@@ -75,13 +75,18 @@ export default {
           return true
         }
       }).then(({ value }) => {
-        const item = this.tableData.find(item => item.id === row.id)
-        item.name = value
-        localStorage.setItem('classificationList', JSON.stringify(this.tableData))
-        this.$message({
-          type: 'success',
-          message: '修改成功'
-        })
+        Axios.get('http://tp51/index.php/api/CommodityType/editType', { params: {
+          id: row.id,
+          type_name: value
+        }})
+          .then(({ data }) => {
+            if (data && data.code === 200) {
+              this.$message.success('修改成功')
+              this.getData()
+            } else {
+              this.$message.error(data)
+            }
+          })
       }).catch(() => {
       })
     },
@@ -91,19 +96,18 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('classificationList', JSON.stringify(this.tableData))
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
-        })
+        Axios.get('http://tp51/index.php/api/CommodityType/delType', { params: { id: row.id }})
+          .then(({ data }) => {
+            if (data && data.code === 200) {
+              this.$message.success('删除成功')
+              this.getData()
+            } else {
+              this.$message.error(data)
+            }
+          })
       }).catch(() => {
 
       })
-    },
-    search() {
-      this.getData()
-      this.tableData = this.tableData.filter(item => item.name.includes(this.searchText))
     }
   }
 }

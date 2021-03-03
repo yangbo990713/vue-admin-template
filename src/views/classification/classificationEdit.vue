@@ -1,8 +1,8 @@
 <template>
   <div class="classification-edit">
     <el-form ref="form" :model="params" :rules="rules" inline size="small">
-      <el-form-item label="类别名称：" prop="name">
-        <el-input v-model="params.name" clearable placeholder="请输入类别名称" />
+      <el-form-item label="类别名称：" prop="type_name">
+        <el-input v-model="params.type_name" clearable placeholder="请输入类别名称" />
       </el-form-item>
       <el-form-item>
         <el-button @click="addClassification">确定</el-button>
@@ -15,12 +15,14 @@
 </template>
 
 <script>
+import Axios from 'axios'
+
 export default {
   name: 'ClassificationEdit',
   data() {
     return {
       params: {
-        name: ''
+        type_name: ''
       },
       rules: {
         name: [
@@ -44,15 +46,12 @@ export default {
     addClassification() {
       this.$refs.form.validate(validate => {
         if (!validate) return
-        let tableData = localStorage.getItem('classificationList')
-        if (tableData) {
-          tableData = JSON.parse(tableData)
-        } else {
-          tableData = []
-        }
-        const id = tableData.length ? tableData[tableData.length - 1].id + 1 : 1
-        tableData.push(Object.assign(this.params, { id }))
-        localStorage.setItem('classificationList', JSON.stringify(tableData))
+        Axios.get('http://tp51/index.php/api/CommodityType/addType', { params: {
+          type_name: this.params.type_name
+        }})
+          .then(({ data }) => {
+            this.tableData = data.data
+          })
         this.$message.success('添加成功')
         this.resetFields()
       })
