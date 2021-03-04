@@ -9,7 +9,7 @@
           <el-input v-model="searchText" clearable placeholder="请输入物品名称" />
         </el-form-item>
         <el-form-item>
-          <el-button @click="search">查询</el-button>
+          <el-button @click="getData">查询</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -19,19 +19,19 @@
     >
       <el-table-column
         label="订单编号"
-        prop="code"
+        prop="number"
       />
       <el-table-column
         label="物品编号"
-        prop="goodsCode"
+        prop="commodity_number"
       />
       <el-table-column
         label="物品名称"
-        prop="goodsName"
+        prop="commodity_name"
       />
       <el-table-column
         label="退货数量"
-        prop="number"
+        prop="quantity"
       />
       <el-table-column
         label="退货原因"
@@ -63,6 +63,7 @@
 <script>
 
 import ReturnOderForm from '@/views/returnOrder/components/returnOrderForm'
+import Axios from 'axios'
 export default {
   name: 'ReturnOrderList',
   components: { ReturnOderForm },
@@ -80,10 +81,16 @@ export default {
   },
   methods: {
     getData() {
-      const tableData = localStorage.getItem('returnOrderList')
-      if (tableData) {
-        this.tableData = JSON.parse(tableData)
-      }
+      Axios.get('http://tp51/index.php/api/ReturnReceipt/returnReceiptList', {
+        params: {
+          name: this.searchText,
+          number: this.code
+        }
+      }).then(({ data }) => {
+        if (data.code === 200) {
+          this.tableData = data.data
+        }
+      })
     },
     editClassification(row) {
       this.currentItem = { ...row }
@@ -95,32 +102,39 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.tableData = this.tableData.filter(item => item.id !== row.id)
-        localStorage.setItem('returnOrderList', JSON.stringify(this.tableData))
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        Axios.get('http://tp51/index.php/api/ReturnReceipt/delReturnReceipt', {
+          params: {
+            ...row
+          }
+        }).then(({ data }) => {
+          if (data.code === 200) {
+            this.$message({
+              type: 'success',
+              message: '删除成功'
+            })
+            this.getData()
+          }
         })
       }).catch(() => {
 
       })
     },
-    search() {
-      this.getData()
-      this.tableData = this.tableData.filter(item => item.goodsName.includes(this.searchText) && item.code.includes(this.code))
-    },
     confirmEdit(row) {
-      if (this.tableData.find(item => item.code === row.code && item.id !== row.id)) {
-        this.$message.error('订单编号重复')
-        return
-      }
-      this.visible = false
-      const index = this.tableData.findIndex(item => item.id === row.id)
-      this.tableData.splice(index, 1, row)
-      localStorage.setItem('returnOrderList', JSON.stringify(this.tableData))
-      this.$message({
-        type: 'success',
-        message: '修改成功'
+      delete row.commodity_name
+      delete row.commodity_number
+      Axios.get('http://tp51/index.php/api/ReturnReceipt/editReturnReceipt', {
+        params: {
+          ...row
+        }
+      }).then(({ data }) => {
+        if (data.code === 200) {
+          this.visible = false
+          this.$message({
+            type: 'success',
+            message: '修改成功'
+          })
+          this.getData()
+        }
       })
     }
   }

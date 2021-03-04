@@ -1,18 +1,18 @@
 <template>
   <el-form ref="form" :inline="inline" :model="params" :rules="rules" label-width="auto" size="small">
-    <el-form-item label="订单编号：" prop="code">
-      <el-input v-model="params.code" clearable placeholder="请输入订单编号" />
+    <el-form-item label="订单编号：" prop="number">
+      <el-input v-model="params.number" clearable placeholder="请输入订单编号" />
     </el-form-item>
-    <el-form-item label="物品名称：" prop="goodsId">
-      <el-select v-model="params.goodsId" placeholder="请选择物品" @change="selectGoods">
+    <el-form-item label="物品名称：" prop="commodity_id">
+      <el-select v-model="params.commodity_id" placeholder="请选择物品" @change="selectGoods">
         <el-option v-for="item of goodsList" :key="item.id " :label="item.name" :value="item.id" />
       </el-select>
     </el-form-item>
     <el-form-item label="日期：" prop="date">
       <el-date-picker v-model="params.date" placeholder="请输入日期" value-format="yyyy-MM-dd" />
     </el-form-item>
-    <el-form-item label="数量：" prop="number">
-      <el-input v-model.number="params.number" clearable placeholder="请输入数量" />
+    <el-form-item label="数量：" prop="quantity">
+      <el-input v-model.number="params.quantity" clearable placeholder="请输入数量" />
     </el-form-item>
     <el-form-item label="退货原因：" prop="reason">
       <el-input v-model="params.reason" placeholder="请输入退货原因" />
@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import Axios from 'axios'
+
 export default {
   name: 'ReturnOrderForm',
   props: {
@@ -43,7 +45,7 @@ export default {
     return {
       goodsList: [],
       rules: {
-        code: [
+        number: [
           {
             required: true,
             message: '请输入订单编号'
@@ -57,7 +59,7 @@ export default {
             message: '订单编号最多10位'
           }
         ],
-        number: [
+        quantity: [
           {
             required: true,
             message: '请输入数量'
@@ -75,16 +77,17 @@ export default {
   },
   methods: {
     getGoodsList() {
-      const tableData = localStorage.getItem('goodsList')
-      if (tableData) {
-        this.goodsList = JSON.parse(tableData)
-      }
+      Axios.get('http://tp51/index.php/api/CommodityInformation/commodityList', {
+        params: {}
+      }).then(({ data }) => {
+        this.goodsList = data.data
+      })
     },
     selectGoods(val) {
-      const item = this.goodsList.find(item => item.id === val)
-      this.params.goodsName = item.name
-      this.params.price = item.price
-      this.params.goodsCode = item.code
+      // const item = this.goodsList.find(item => item.id === val)
+      // this.params.goodsName = item.name
+      // this.params.price = item.price
+      // this.params.goodsCode = item.code
     },
     addOrder() {
       this.$refs.form.validate(validate => {

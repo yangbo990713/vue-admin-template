@@ -6,39 +6,26 @@
 
 <script>
 import ReturnOderForm from '@/views/returnOrder/components/returnOrderForm'
+import Axios from 'axios'
 export default {
   name: 'ReturnOrderEdit',
   components: { ReturnOderForm },
   data() {
     return {
       params: {
-        name: '',
-        code: '',
-        goodsId: '',
-        goodsCode: '',
-        goodsName: '',
-        number: ''
       }
     }
   },
   methods: {
     addClassification(params) {
-      let tableData = localStorage.getItem('returnOrderList')
-      if (tableData) {
-        tableData = JSON.parse(tableData)
-      } else {
-        tableData = []
-      }
-      if (tableData.find(item => item.code === params.code)) {
-        this.$message.error('订单编号重复')
-        return
-      }
-
-      const id = tableData.length ? tableData[tableData.length - 1].id + 1 : 1
-      tableData.push(Object.assign(params, { id }))
-      localStorage.setItem('returnOrderList', JSON.stringify(tableData))
-      this.$message.success('添加成功')
-      this.$refs.goodsForm.resetFields()
+      Axios.get('http://tp51/index.php/api/ReturnReceipt/addReturnReceipt', {
+        params: { ...params }
+      }).then(({ data }) => {
+        if (data.code === 200) {
+          this.$message.success('添加成功')
+          this.$refs.goodsForm.resetFields()
+        }
+      })
     }
   }
 }
